@@ -3,10 +3,12 @@ import sys
 from scapy.all import rdpcap, IP, TCP, UDP
 
 def extract_pcap_info(pcap_file, output_csv):
+    # 打开PCAP文件，比较慢还可能导致虚拟机死机
     packets = rdpcap(pcap_file)
-    print("pcap readed")
+    print("PCAP file read")
     
     with open(output_csv, 'w', newline='') as csvfile:
+        # 提取五元组，包大小，TCP窗口大小
         fieldnames = ['timestamp', 'src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol', 'protocol_name', 'packet_size', 'tcp_window_size']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
@@ -23,6 +25,7 @@ def extract_pcap_info(pcap_file, output_csv):
                 tcp_window_size = None
                 protocol_name = None
 
+                # 剔除非TCP和UDP报文
                 if proto != 6 and proto != 17:
                     continue
                 
@@ -49,7 +52,7 @@ def extract_pcap_info(pcap_file, output_csv):
                     'tcp_window_size': tcp_window_size
                 })
     
-    print(f"Extraction completed. Data saved to {output_csv}")
+    print(f"Extraction Complete. Data saved to {output_csv}")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
