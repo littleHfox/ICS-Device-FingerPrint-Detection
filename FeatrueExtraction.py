@@ -70,7 +70,7 @@ def extract_featrue(input_csv, output_csv):
         if len(flow) == 8:
             new_df = pd.DataFrame(flow, columns=df_in.columns)
 
-            df_out = pd.concat([df_out, empty_df, new_df], ignore_index=True)
+            df_out = pd.concat([df_out, new_df, empty_df], ignore_index=True)
 
     df_out.to_csv(output_csv, index=False)
     print(f"Extraction Complete. Data saved to {output_csv}")
