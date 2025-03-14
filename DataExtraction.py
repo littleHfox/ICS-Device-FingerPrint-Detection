@@ -4,7 +4,7 @@ from scapy.all import rdpcap, IP, TCP, UDP
 
 def extract_pcap_info(pcap_file, output_csv):
     # 打开PCAP文件，比较慢还可能导致虚拟机死机
-    packets = rdpcap(pcap_file)
+    packets = rdpcap(pcap_file, count=5000000)
     print("PCAP file read")
     
     with open(output_csv, 'w', newline='') as csvfile:

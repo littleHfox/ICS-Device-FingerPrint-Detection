@@ -12,8 +12,10 @@ def extract_featrue(input_csv, output_csv):
     flows = []
 
     for index, pkt in df_in.iterrows():
-        if index % 1000 == 0:
-            print(f"{index}")
+        if index % 10000 == 0:
+            print(f"{index}", end="\r", flush=True)
+            if index == 1200000:
+                break
         # 堆为空
         if len(flows) == 0:
             pkt['interval_time'] = 0
@@ -38,8 +40,8 @@ def extract_featrue(input_csv, output_csv):
                     # elif len(flow) > 16:
                     #     print(f"Warning! Flow length bigger than 16!")
                     
-                    # 8个包为一个子流，主要因为样本数据几乎都是8个的流
-                    if len(flow) < 8:
+                    # 16个包为一个子流
+                    if len(flow) < 16:
                         pkt['interval_time'] = pkt['timestamp'] - flow[-1]['timestamp']
 
                         if pkt['src_ip'] == flow[0]['dst_ip']:
@@ -66,8 +68,8 @@ def extract_featrue(input_csv, output_csv):
     df_out = pd.DataFrame(columns=df_in.columns)
     empty_df = pd.DataFrame(None, index=[0], columns=df_in.columns)
     for flow in flows:
-        # 不足8个包的子流都被舍弃
-        if len(flow) == 8:
+        # 不足16个包的子流都被舍弃
+        if len(flow) == 16:
             new_df = pd.DataFrame(flow, columns=df_in.columns)
 
             df_out = pd.concat([df_out, new_df, empty_df], ignore_index=True)
