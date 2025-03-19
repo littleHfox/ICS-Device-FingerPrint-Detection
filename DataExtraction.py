@@ -1,6 +1,6 @@
 import csv
 import sys
-from scapy.all import rdpcap, IP, TCP, UDP, RawPcapReader
+from scapy.all import rdpcap, IP, TCP, UDP, RawPcapReader, Ether
 
 def extract_pcap_info(pcap_file, output_csv):
     # 打开PCAP文件，比较慢还可能导致虚拟机死机
@@ -14,20 +14,22 @@ def extract_pcap_info(pcap_file, output_csv):
         writer.writeheader()
         
         with RawPcapReader(pcap_file) as pcap_reader:
-            for i, (pkt, pkt_metadata) in enumerate(pcap_reader):
+            for i, (pkt_data, pkt_metadata) in enumerate(pcap_reader):
                 if i % 100000 == 0:
                     print(i, end='\r', flush=True)
                 if i < 1000000:
                     continue
                 elif i > 6000000:
                     break
+
             #for pkt in packets:
+                pkt = Ether(pkt_data)
                 if IP in pkt:
                     src_ip = pkt[IP].src
                     dst_ip = pkt[IP].dst
                     proto = pkt[IP].proto
-                    timestamp = pkt.time
-                    packet_size = len(pkt)
+                    timestamp = pkt_metadata.sec + pkt_metadata.usec * 1e-6
+                    packet_size = pkt_metadata.wirelen
                     src_port = None
                     dst_port = None
                     tcp_window_size = None

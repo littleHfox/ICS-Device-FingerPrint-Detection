@@ -4,8 +4,8 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 
 csv_file1 = 'NormalizedIntervalTime.csv'
-csv_file2 = 'OrderedPacketSize.csv'
-csv_file3 = 'OrderedTCPWindow.csv'
+csv_file2 = 'NormalizedPacketSize.csv'
+csv_file3 = 'NormalizedTCPWindow.csv'
 csv_file4 = 'OrderedDirection.csv'
 
 df1 = pd.read_csv(csv_file1)
@@ -22,7 +22,7 @@ F4 = df4.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 F = pd.concat([F1, F2, F3, F4], axis=1)
 
 # 划分测试集
-F_train, F_test, L_train, L_test = train_test_split(F, L, test_size=0.1, random_state=42)
+F_train, F_test, L_train, L_test = train_test_split(F, L, test_size=0.3, random_state=42)
 
 # 训练模型
 clf = RandomForestClassifier(n_estimators=100, random_state=42)  # 使用100棵树

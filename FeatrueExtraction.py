@@ -14,7 +14,7 @@ def extract_featrue(input_csv, output_csv):
     for index, pkt in df_in.iterrows():
         if index % 10000 == 0:
             print(f"{index}", end="\r", flush=True)
-            if index == 1200000:
+            if index == 2000000:
                 break
         # 堆为空
         if len(flows) == 0:
@@ -29,31 +29,31 @@ def extract_featrue(input_csv, output_csv):
             found = False
             for flow in reversed(flows):
                 # 包属于已知子流
-                if (pkt['src_ip'] == flow[0]['src_ip'] or pkt['src_ip'] == flow[0]['dst_ip']) and \
-                    (pkt['dst_ip'] == flow[0]['dst_ip'] or pkt['dst_ip'] == flow[0]['src_ip']) and \
-                    (pkt['src_port'] == flow[0]['src_port'] or pkt['src_port'] == flow[0]['dst_port']) and \
-                    (pkt['dst_port'] == flow[0]['dst_port'] or pkt['dst_port'] == flow[0]['src_port']) and \
-                    pkt['protocol'] == flow[0]['protocol']:
+                if (pkt['src_ip'] == flow[0]['src_ip'] or pkt['src_ip'] == flow[0]['dst_ip']):
+                    if(pkt['dst_ip'] == flow[0]['dst_ip'] or pkt['dst_ip'] == flow[0]['src_ip']):
+                        if (pkt['src_port'] == flow[0]['src_port'] or pkt['src_port'] == flow[0]['dst_port']):
+                            if (pkt['dst_port'] == flow[0]['dst_port'] or pkt['dst_port'] == flow[0]['src_port']):
+                                if pkt['protocol'] == flow[0]['protocol']:
 
-                    # if len(flow) == 16:
-                    #     print(f"length>16")
-                    # elif len(flow) > 16:
-                    #     print(f"Warning! Flow length bigger than 16!")
-                    
-                    # 16个包为一个子流
-                    if len(flow) < 16:
-                        pkt['interval_time'] = pkt['timestamp'] - flow[-1]['timestamp']
+                                    # if len(flow) == 16:
+                                    #     print(f"length>16")
+                                    # elif len(flow) > 16:
+                                    #     print(f"Warning! Flow length bigger than 16!")
+                                    
+                                    # 16个包为一个子流
+                                    if len(flow) < 16:
+                                        pkt['interval_time'] = pkt['timestamp'] - flow[-1]['timestamp']
 
-                        if pkt['src_ip'] == flow[0]['dst_ip']:
-                            pkt['direction'] = 0
-                        else:
-                            pkt['direction'] = 1
+                                        if pkt['src_ip'] == flow[0]['dst_ip']:
+                                            pkt['direction'] = 0
+                                        else:
+                                            pkt['direction'] = 1
 
-                        flow.append(pkt)
-                        #print(f"pkt append")
+                                        flow.append(pkt)
+                                        #print(f"pkt append")
 
-                    found = True
-                    break
+                                    found = True
+                                    break
 
             # 包不属于已知子流
             if not found:
