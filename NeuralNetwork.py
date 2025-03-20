@@ -8,7 +8,7 @@ from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset, DataLoader
 
 # 1. 读取 CSV 数据
-csv_file1 = 'NormalizedIntervalTime.csv'
+csv_file1 = 'dft_output.csv'
 csv_file2 = 'NormalizedPacketSize.csv'
 csv_file3 = 'NormalizedTCPWindow.csv'
 csv_file4 = 'OrderedDirection.csv'
