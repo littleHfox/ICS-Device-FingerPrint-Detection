@@ -4,7 +4,7 @@ import sys
 def normalize_time(input_csv, output_csv):
     df = pd.read_csv(input_csv)
     for r in range(len(df)):
-        for c in range(6, 20):
+        for c in range(6, 21):
             if df.iat[r, c] > 1:
                 df.iat[r, c] =1
     
@@ -13,7 +13,7 @@ def normalize_time(input_csv, output_csv):
 def normalize_pkt_size(input_csv, output_csv):
     df = pd.read_csv(input_csv)
     for r in range(len(df)):
-        for c in range(5, 20):
+        for c in range(5, 21):
             if df.iat[r, c] > 1500:
                 df.iat[r, c] =1
             else:
@@ -24,7 +24,7 @@ def normalize_pkt_size(input_csv, output_csv):
 def normalize_window(input_csv, output_csv):
     df = pd.read_csv(input_csv)
     for r in range(len(df)):
-        for c in range(5, 20):
+        for c in range(5, 21):
             if df.iat[r, c] > 60000:
                 df.iat[r, c] =1
             else:
