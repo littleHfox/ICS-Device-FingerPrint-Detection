@@ -7,10 +7,10 @@ from sklearn.model_selection import cross_val_score
 
 target_ip = '192.168.10.150'
 
-csv_file1 = 'dft_output.csv'
-csv_file2 = 'NormalizedPacketSize.csv'
-csv_file3 = 'NormalizedTCPWindow.csv'
-csv_file4 = 'OrderedDirection.csv'
+csv_file1 = '1/NormalizedIntervalTime.csv'
+csv_file2 = '1/NormalizedPacketSize.csv'
+csv_file3 = '1/NormalizedTCPWindow.csv'
+csv_file4 = '1/OrderedDirection.csv'
 
 df1 = pd.read_csv(csv_file1)
 df2 = pd.read_csv(csv_file2)

@@ -14,7 +14,7 @@ def extract_featrue(input_csv, output_csv):
     for index, pkt in df_in.iterrows():
         if index % 10000 == 0:
             print(f"{index}", end="\r", flush=True)
-            if index == 2000000:
+            if index == 1200000:
                 break
         # 堆为空
         if len(flows) == 0:

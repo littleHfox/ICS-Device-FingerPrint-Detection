@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 # 读取 CSV 文件
-file_path = "NormalizedIntervalTime.csv"  # 你的 CSV 文件路径
+file_path = "1/NormalizedIntervalTime.csv"  # 你的 CSV 文件路径
 df = pd.read_csv(file_path)
 
 w = 12
@@ -34,7 +34,7 @@ for i in range(17-w):
     df_out = pd.concat([df_out, dft_real.iloc[:, 0:cut]], axis=1)
 
 # 保存结果
-output_path = "dft_output.csv"
+output_path = "1/dft_output.csv"
 df_out.to_csv(output_path, index=False)
 
 print(f"DFT 计算完成，结果已保存到 {output_path}")
