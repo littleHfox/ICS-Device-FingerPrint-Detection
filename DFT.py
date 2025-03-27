@@ -27,8 +27,8 @@ for i in range(17-w):
     dft_imag = dft_results.map(lambda x: x.imag)  # 获取虚部
 
     # 将 DFT 结果合并回原数据框
-    dft_real.columns = [f"DFT_Real_{j}" for j in range(4*i, 4*i+w)]
-    dft_imag.columns = [f"DFT_Imag_{j}" for j in range(4*i, 4*i+w)]
+    dft_real.columns = [f"DFT_Real_{j}" for j in range(cut*i, cut*i+w)]
+    dft_imag.columns = [f"DFT_Imag_{j}" for j in range(cut*i, cut*i+w)]
 
     # 将DFT结果合并回原数据框（不要虚部）
     df_out = pd.concat([df_out, dft_real.iloc[:, 0:cut]], axis=1)
