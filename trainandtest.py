@@ -7,7 +7,7 @@ from sklearn.model_selection import cross_val_score
 
 target_ip = '192.168.10.150'
 
-csv_file1 = '2_formatted/NormalizedIntervalTime.csv'
+csv_file1 = '2_formatted/dft_output2.csv'
 csv_file2 = '2_formatted/NormalizedPacketSize.csv'
 csv_file3 = '2_formatted/NormalizedTCPWindow.csv'
 csv_file4 = '2_formatted/OrderedDirection.csv'
@@ -39,7 +39,7 @@ clf.fit(F_train, L_train)
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 # 进行交叉验证，评估准确率
-scores = cross_val_score(clf, F, L, cv=cv, scoring='accuracy')
+scores = cross_val_score(clf, F3, L, cv=cv, scoring='accuracy')
 
 # 获取特征重要性
 # featrue_importance = [1.5] * 25 + [0.8] * 48

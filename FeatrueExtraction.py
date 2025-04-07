@@ -14,7 +14,7 @@ def extract_featrue(input_csv, output_csv):
     for index, pkt in df_in.iterrows():
         if index % 10000 == 0:
             print(f"{index}", end="\r", flush=True)
-            if index == 1200000:
+            if index == 2000000:
                 break
         # 堆为空
         if len(flows) == 0:
@@ -33,13 +33,7 @@ def extract_featrue(input_csv, output_csv):
                     if(pkt['dst_ip'] == flow[0]['dst_ip'] or pkt['dst_ip'] == flow[0]['src_ip']):
                         if (pkt['src_port'] == flow[0]['src_port'] or pkt['src_port'] == flow[0]['dst_port']):
                             if (pkt['dst_port'] == flow[0]['dst_port'] or pkt['dst_port'] == flow[0]['src_port']):
-                                if pkt['protocol'] == flow[0]['protocol']:
-
-                                    # if len(flow) == 16:
-                                    #     print(f"length>16")
-                                    # elif len(flow) > 16:
-                                    #     print(f"Warning! Flow length bigger than 16!")
-                                    
+                                if pkt['protocol'] == flow[0]['protocol']:                                  
                                     # 16个包为一个子流
                                     if len(flow) < 16:
                                         pkt['interval_time'] = pkt['timestamp'] - flow[-1]['timestamp']

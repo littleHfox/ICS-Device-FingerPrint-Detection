@@ -17,9 +17,9 @@ def extract_pcap_info(pcap_file, output_csv):
             for i, (pkt_data, pkt_metadata) in enumerate(pcap_reader):
                 if i % 100000 == 0:
                     print(i, end='\r', flush=True)
-                if i < 0:
+                if i < 1000000:
                     continue
-                elif i > 2000000:
+                elif i > 6000000:
                     break
 
             #for pkt in packets:

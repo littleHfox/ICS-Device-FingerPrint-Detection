@@ -10,7 +10,7 @@ def dft(input_csv, output_csv):
     cut = 5
     # 计算DFT并存储
     def compute_dft(row):
-        X = np.fft.fft(row)  # 计算DFT
+        X = np.fft.ifft(row)  # 计算DFT
         return pd.Series(X)  # 返回完整的DFT结果
 
     df_out = df.iloc[:, 0:5]
