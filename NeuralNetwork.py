@@ -8,10 +8,10 @@ from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset, DataLoader
 
 # 1. 读取 CSV 数据
-csv_file1 = 'dft_output.csv'
-csv_file2 = 'NormalizedPacketSize.csv'
-csv_file3 = 'NormalizedTCPWindow.csv'
-csv_file4 = 'OrderedDirection.csv'
+csv_file1 = '2_formatted/dft_output2.csv'
+csv_file2 = '2_formatted/NormalizedPacketSize.csv'
+csv_file3 = '2_formatted/NormalizedTCPWindow.csv'
+csv_file4 = '2_formatted/OrderedDirection.csv'
 
 df1 = pd.read_csv(csv_file1)
 df2 = pd.read_csv(csv_file2)

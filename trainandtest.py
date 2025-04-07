@@ -39,7 +39,7 @@ clf.fit(F_train, L_train)
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 # 进行交叉验证，评估准确率
-scores = cross_val_score(clf, F3, L, cv=cv, scoring='accuracy')
+scores = cross_val_score(clf, F, L, cv=cv, scoring='accuracy')
 
 # 获取特征重要性
 # featrue_importance = [1.5] * 25 + [0.8] * 48
