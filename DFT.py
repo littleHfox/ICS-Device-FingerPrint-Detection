@@ -11,7 +11,8 @@ def dft(input_csv, output_csv):
     # 计算DFT并存储
     def compute_dft(row):
         X = np.fft.ifft(row)  # 计算DFT
-        return pd.Series(X)  # 返回完整的DFT结果
+        mod = np.abs(X)       # 计算模
+        return pd.Series(mod)  # 返回完整的DFT结果
 
     df_out = df.iloc[:, 0:5]
     for i in range(17-w):
@@ -24,15 +25,20 @@ def dft(input_csv, output_csv):
         dft_results = slid_window.apply(compute_dft, axis=1)
 
         # 拆分复数的实部和虚部，方便存储
-        dft_real = dft_results.map(lambda x: x.real)  # 获取实部
-        dft_imag = dft_results.map(lambda x: x.imag)  # 获取虚部
+        # dft_real = dft_results.map(lambda x: x.real)  # 获取实部
+        # dft_imag = dft_results.map(lambda x: x.imag)  # 获取虚部
 
         # 将 DFT 结果合并回原数据框
-        dft_real.columns = [f"DFT_Real_{j}" for j in range(cut*i, cut*i+w)]
-        dft_imag.columns = [f"DFT_Imag_{j}" for j in range(cut*i, cut*i+w)]
+        # dft_real.columns = [f"DFT_Real_{j}" for j in range(cut*i, cut*i+w)]
+        # dft_imag.columns = [f"DFT_Imag_{j}" for j in range(cut*i, cut*i+w)]
 
         # 将DFT结果合并回原数据框（不要虚部）
-        df_out = pd.concat([df_out, dft_real.iloc[:, 0:cut]], axis=1)
+        # df_out = pd.concat([df_out, dft_real.iloc[:, 0:cut]], axis=1)
+
+        # 给模每列命名
+        dft_results.columns = [f"DFT_Mod_{j}" for j in range(cut*i, cut*i+w)]
+        # 将结果合并
+        df_out = pd.concat([df_out, dft_results.iloc[:, 0:cut]], axis=1)
 
     # 保存结果
     df_out.to_csv(output_csv, index=False)

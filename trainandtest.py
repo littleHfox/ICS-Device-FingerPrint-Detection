@@ -7,7 +7,7 @@ from sklearn.model_selection import cross_val_score
 
 target_ip = '192.168.10.150'
 
-csv_file1 = '2_formatted/dft_output2.csv'
+csv_file1 = '2_formatted/dft_IntervalTime_mod.csv'
 csv_file2 = '2_formatted/NormalizedPacketSize.csv'
 csv_file3 = '2_formatted/NormalizedTCPWindow.csv'
 csv_file4 = '2_formatted/OrderedDirection.csv'

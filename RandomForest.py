@@ -7,7 +7,8 @@ import pandas as pd
 
 target_ip = '192.168.10.150'
 
-csv_file1 = '2_formatted/dft_IntervalTime.csv'
+# csv_file1 = '2_formatted/dft_IntervalTime.csv'
+csv_file1 = '2_formatted/dft_IntervalTime_mod.csv'
 # csv_file2 = '2_formatted/dft_PacketSize.csv'
 # csv_file3 = '2_formatted/dft_TCPWindow.csv'
 # csv_file4 = '2_formatted/dft_Direction.csv'
@@ -33,15 +34,15 @@ X4 = df4.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 X = pd.concat([X1, X2, X3, X4], axis=1)
 
 # 过采样
-# sampling_strategy = {}
-# for label, count in y.value_counts().items():
-#     if count < 5:
-#         sampling_strategy[label] = 5
-#     else:
-#         sampling_strategy[label] = count
-# ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+sampling_strategy = {}
+for label, count in y.value_counts().items():
+    if count < 5:
+        sampling_strategy[label] = 5
+    else:
+        sampling_strategy[label] = count
+ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
 
-ros = RandomOverSampler(random_state=42)
+# ros = RandomOverSampler(random_state=42)
 X_resampled, y_resampled = ros.fit_resample(X, y)
 
 # 在采样后的数据上做交叉验证
@@ -67,7 +68,7 @@ for train_index, test_index in skf.split(X_resampled, y_resampled):
     f1_list.append(f1_score(y_test, y_pred, average='macro', zero_division=0))
 
 # 输出最终结果
-print("五折交叉验证结果：")
+print("五重交叉验证结果：")
 print(f"平均准确率：{np.mean(accuracy_list):.4f}")
 print(f"平均精准率（macro）：{np.mean(precision_list):.4f}")
 print(f"平均召回率（macro）：{np.mean(recall_list):.4f}")
