@@ -34,15 +34,15 @@ X4 = df4.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 X = pd.concat([X1, X2, X3, X4], axis=1)
 
 # 过采样
-sampling_strategy = {}
-for label, count in y.value_counts().items():
-    if count < 5:
-        sampling_strategy[label] = 5
-    else:
-        sampling_strategy[label] = count
-ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+# sampling_strategy = {}
+# for label, count in y.value_counts().items():
+#     if count < 5:
+#         sampling_strategy[label] = 5
+#     else:
+#         sampling_strategy[label] = count
+# ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
 
-# ros = RandomOverSampler(random_state=42)
+ros = RandomOverSampler(random_state=42)
 X_resampled, y_resampled = ros.fit_resample(X, y)
 
 # 在采样后的数据上做交叉验证

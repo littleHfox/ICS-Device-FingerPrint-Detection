@@ -8,7 +8,7 @@ from imblearn.over_sampling import RandomOverSampler
 import numpy as np
 import pandas as pd
 
-# ====== 设备配置：自动用GPU（如果可用） ======
+# ===== 设备设置 =====
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
@@ -50,58 +50,71 @@ y_encoded = le.fit_transform(y)
 
 # ===== 在交叉验证之前先进行随机过采样 =====
 # 过采样
-# sampling_strategy = {}
-# unique_labels, counts = np.unique(y_encoded, return_counts=True)
-# for label, count in zip(unique_labels, counts):
-#     if count < 5:
-#         sampling_strategy[label] = 5
-#     else:
-#         sampling_strategy[label] = count
-# ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+sampling_strategy = {}
+unique_labels, counts = np.unique(y_encoded, return_counts=True)
+for label, count in zip(unique_labels, counts):
+    if count < 5:
+        sampling_strategy[label] = 5
+    else:
+        sampling_strategy[label] = count
+ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
 
-ros = RandomOverSampler(random_state=42)
+# ros = RandomOverSampler(random_state=42)
 X_resampled, y_resampled = ros.fit_resample(X, y_encoded)
 
-# 转Tensor并送到设备
-X_tensor = torch.tensor(X_resampled, dtype=torch.float32).to(device)
-y_tensor = torch.tensor(y_resampled, dtype=torch.long).to(device)
+# ===== 转Tensor + 调整形状 =====
+X_resampled = torch.tensor(X_resampled, dtype=torch.float32).to(device)
+y_resampled = torch.tensor(y_resampled, dtype=torch.long).to(device)
 
-# ====== 简单FNN模型 ======
-class FNN(nn.Module):
-    def __init__(self, input_dim, output_dim):
-        super(FNN, self).__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, 128),
+# CNN需要给输入加 channel 维度 (N, C, L)
+X_resampled = X_resampled.unsqueeze(1)  # 在第1维插入通道数，原本(N, feature) → (N, 1, feature)
+
+# ===== CNN定义 =====
+class ImprovedCNN(nn.Module):
+    def __init__(self, input_len, num_classes):
+        super(ImprovedCNN, self).__init__()
+        self.conv_layers = nn.Sequential(
+            nn.Conv1d(1, 64, kernel_size=5, padding=2),
+            nn.BatchNorm1d(64),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Conv1d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm1d(128),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool1d(1)  # 将特征图池化为 (batch, channels, 1)
+        )
+        self.fc_layers = nn.Sequential(
+            nn.Flatten(),
+            nn.Dropout(0.5),
             nn.Linear(128, 64),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(64, output_dim)
+            nn.Linear(64, num_classes)
         )
 
     def forward(self, x):
-        return self.net(x)
+        x = self.conv_layers(x)
+        x = self.fc_layers(x)
+        return x
 
-# ====== 超参数 ======
+# ===== 超参数 =====
 input_dim = X.shape[1]
 num_classes = len(np.unique(y_encoded))
 epochs = 30
 batch_size = 32
 learning_rate = 0.001
 
-# ====== 交叉验证 ======
+# ===== 五折交叉验证 =====
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 acc_list, f1_list, precision_list, recall_list = [], [], [], []
 
-for fold, (train_idx, test_idx) in enumerate(skf.split(X_resampled, y_resampled)):
+for fold, (train_idx, test_idx) in enumerate(skf.split(X_resampled.cpu(), y_resampled.cpu())):
     print(f"\n=== Fold {fold+1} ===")
     
-    X_train, X_test = X_tensor[train_idx], X_tensor[test_idx]
-    y_train, y_test = y_tensor[train_idx], y_tensor[test_idx]
+    X_train, X_test = X_resampled[train_idx], X_resampled[test_idx]
+    y_train, y_test = y_resampled[train_idx], y_resampled[test_idx]
 
-    model = FNN(input_dim, num_classes).to(device)
+    model = ImprovedCNN(input_dim, num_classes).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -118,14 +131,14 @@ for fold, (train_idx, test_idx) in enumerate(skf.split(X_resampled, y_resampled)
             loss.backward()
             optimizer.step()
 
-    # === 推理 ===
+    # === 测试 ===
     model.eval()
     with torch.no_grad():
-        y_pred_logits = model(X_test)
-        y_pred = torch.argmax(y_pred_logits, dim=1).cpu().numpy()  # 注意 .cpu()
+        outputs = model(X_test)
+        y_pred = torch.argmax(outputs, dim=1).cpu().numpy()
         y_true = y_test.cpu().numpy()
 
-    # === 指标计算 ===
+    # === 计算指标 ===
     acc = accuracy_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred, average='macro', zero_division=0)
     recall = recall_score(y_true, y_pred, average='macro', zero_division=0)
@@ -138,7 +151,7 @@ for fold, (train_idx, test_idx) in enumerate(skf.split(X_resampled, y_resampled)
 
     print(f"准确率: {acc:.4f} 精准率: {precision:.4f} 召回率: {recall:.4f} F1: {f1:.4f}")
 
-# ====== 汇总输出 ======
+# ===== 汇总 =====
 print("\n==== 5折交叉验证结果 ====")
 print(f"平均准确率: {np.mean(acc_list):.4f}")
 print(f"平均精准率 (macro): {np.mean(precision_list):.4f}")
