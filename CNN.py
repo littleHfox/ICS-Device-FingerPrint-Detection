@@ -50,16 +50,16 @@ y_encoded = le.fit_transform(y)
 
 # ===== 在交叉验证之前先进行随机过采样 =====
 # 过采样
-sampling_strategy = {}
-unique_labels, counts = np.unique(y_encoded, return_counts=True)
-for label, count in zip(unique_labels, counts):
-    if count < 5:
-        sampling_strategy[label] = 5
-    else:
-        sampling_strategy[label] = count
-ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+# sampling_strategy = {}
+# unique_labels, counts = np.unique(y_encoded, return_counts=True)
+# for label, count in zip(unique_labels, counts):
+#     if count < 5:
+#         sampling_strategy[label] = 5
+#     else:
+#         sampling_strategy[label] = count
+# ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
 
-# ros = RandomOverSampler(random_state=42)
+ros = RandomOverSampler(random_state=42)
 X_resampled, y_resampled = ros.fit_resample(X, y_encoded)
 
 # ===== 转Tensor + 调整形状 =====
