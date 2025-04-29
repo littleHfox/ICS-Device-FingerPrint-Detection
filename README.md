@@ -14,7 +14,7 @@ python OrderFeatrue.py ExtractedFeatrue.csv <Output_Ordered_Featrue_csv> <functi
 python Normalization.py <input_Ordered_Featrue_csv> <output_Normalized_Featrue_csv> <function_num>
 6. 离散化时间特征  
 python DFT.py <NormalizedFeatrue.csv> <dft_featrue.csv>
-7. 训练模型和测试 
+7. 训练模型和测试  
 A. 机器学习方法  
 (1). 随机森林算法  
 python RandomForest.py  
