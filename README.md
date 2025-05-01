@@ -32,4 +32,5 @@ python RNN.py
 (2). CNN（卷积神经网络）  
 python CNN.py  
 (3). ResNet（残差神经网络）  
-python ResNet.py
+python ResNet_FNN.py (FNN风格的残差)  
+python ResNet_CNN.py (CNN风格的残差)
