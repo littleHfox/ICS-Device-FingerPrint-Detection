@@ -1,7 +1,8 @@
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 from imblearn.over_sampling import RandomOverSampler
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -54,6 +55,9 @@ accuracy_list = []
 precision_list = []
 recall_list = []
 f1_list = []
+all_labels = sorted(y.unique())
+label_to_index = {label: idx for idx, label in enumerate(all_labels)}
+total_cm = np.zeros((len(all_labels), len(all_labels)), dtype=int)
 
 for train_index, test_index in skf.split(X_resampled, y_resampled):
     X_train, X_test = X_resampled.iloc[train_index], X_resampled.iloc[test_index]
@@ -67,6 +71,10 @@ for train_index, test_index in skf.split(X_resampled, y_resampled):
     recall_list.append(recall_score(y_test, y_pred, average='macro', zero_division=0))
     f1_list.append(f1_score(y_test, y_pred, average='macro', zero_division=0))
 
+    # 计算当前折的混淆矩阵
+    cm = confusion_matrix(y_test, y_pred, labels=all_labels)
+    total_cm += cm  # 累计混淆矩阵
+
 # 输出最终结果
 print("五重交叉验证结果：")
 print(f"平均准确率：{np.mean(accuracy_list):.4f}")
@@ -74,3 +82,9 @@ print(f"平均精准率（macro）：{np.mean(precision_list):.4f}")
 print(f"平均召回率（macro）：{np.mean(recall_list):.4f}")
 print(f"平均F1分数（macro）：{np.mean(f1_list):.4f}")
 
+# 总体混淆矩阵
+disp = ConfusionMatrixDisplay(confusion_matrix=total_cm, display_labels=all_labels)
+disp.plot(xticks_rotation=45, cmap='Blues')
+plt.title("Confusion Matrix (RF)")
+plt.tight_layout()
+plt.show()
