@@ -8,15 +8,15 @@ import pandas as pd
 target_ip = '192.168.10.150'
 
 # csv_file1 = '2_formatted/dft_IntervalTime.csv'
-csv_file1 = '2_formatted/dft_IntervalTime_mod.csv'
+csv_file1 = '2/dft_IntervalTime_mod.csv'
 # csv_file2 = '2_formatted/dft_PacketSize.csv'
 # csv_file3 = '2_formatted/dft_TCPWindow.csv'
 # csv_file4 = '2_formatted/dft_Direction.csv'
 
 # csv_file1 = '2_formatted/Origin_IntervalTime.csv'
-csv_file2 = '2_formatted/NormalizedPacketSize.csv'
-csv_file3 = '2_formatted/NormalizedTCPWindow.csv'
-csv_file4 = '2_formatted/OrderedDirection.csv'
+csv_file2 = '2/NormalizedPacketSize.csv'
+csv_file3 = '2/NormalizedTCPWindow.csv'
+csv_file4 = '2/OrderedDirection.csv'
 
 df1 = pd.read_csv(csv_file1)
 df2 = pd.read_csv(csv_file2)
@@ -24,6 +24,8 @@ df3 = pd.read_csv(csv_file3)
 df4 = pd.read_csv(csv_file4)
 
 # 提取特征和标签集
+mask = df1["src_ip"].notna() & df1["src_ip"].astype(str).str.startswith("192").eq(False)
+df1.loc[mask, ["src_ip"]] = df1.loc[mask, ["dst_ip"]].values
 y = df1['src_ip']
 # y = (df1['src_ip'] == target_ip).astype(int)
 # X1 = df1.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port'], axis=1)
