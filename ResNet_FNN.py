@@ -8,31 +8,62 @@ from imblearn.over_sampling import RandomOverSampler
 import numpy as np
 import pandas as pd
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
 # 数据加载
-csv_file1 = '2_formatted/dft_IntervalTime_mod.csv'
-csv_file2 = '2_formatted/NormalizedPacketSize.csv'
-csv_file3 = '2_formatted/NormalizedTCPWindow.csv'
-csv_file4 = '2_formatted/OrderedDirection.csv'
+# csv_file1 = '2_formatted/dft_IntervalTime.csv'
+csv_file1 = '2/dft_IntervalTime_mod.csv'
+# csv_file2 = '2_formatted/dft_PacketSize.csv'
+# csv_file3 = '2_formatted/dft_TCPWindow.csv'
+# csv_file4 = '2_formatted/dft_Direction.csv'
+
+# csv_file1 = '2/Origin_IntervalTime.csv'
+csv_file2 = '2/NormalizedPacketSize.csv'
+csv_file3 = '2/NormalizedTCPWindow.csv'
+csv_file4 = '2/OrderedDirection.csv'
 
 df1 = pd.read_csv(csv_file1)
 df2 = pd.read_csv(csv_file2)
 df3 = pd.read_csv(csv_file3)
 df4 = pd.read_csv(csv_file4)
 
+# 提取特征和标签集
+mask = df1["src_ip"].notna() & df1["src_ip"].astype(str).str.startswith("192").eq(False)
+df1.loc[mask, ["src_ip"]] = df1.loc[mask, ["dst_ip"]].values
 y = df1['src_ip']
+# y = (df1['src_ip'] == target_ip).astype(int)
+# X1 = df1.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port'], axis=1)
 X1 = df1.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 X2 = df2.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 X3 = df3.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 X4 = df4.drop(['src_ip', 'dst_ip', 'src_port', 'dst_port', 'protocol'], axis=1)
 X = pd.concat([X1, X2, X3, X4], axis=1)
 
-X_np = X.values.astype(np.float32)
-le = LabelEncoder()
-y_encoded = le.fit_transform(y.values)
+X = X.values.astype(np.float32)
+y = y.values
 
-# 折前整体过采样
+# 标签编码
+le = LabelEncoder()
+y_encoded = le.fit_transform(y)
+
+# ===== 在交叉验证之前先进行随机过采样 =====
+# 过采样
+# sampling_strategy = {}
+# unique_labels, counts = np.unique(y_encoded, return_counts=True)
+# for label, count in zip(unique_labels, counts):
+#     if count < 5:
+#         sampling_strategy[label] = 5
+#     else:
+#         sampling_strategy[label] = count
+# ros = RandomOverSampler(sampling_strategy=sampling_strategy, random_state=42)
+
 ros = RandomOverSampler(random_state=42)
-X_resampled, y_resampled = ros.fit_resample(X_np, y_encoded)
+X_resampled, y_resampled = ros.fit_resample(X, y_encoded)
+
+# 转Tensor并送到设备
+X_tensor = torch.tensor(X_resampled, dtype=torch.float32).to(device)
+y_tensor = torch.tensor(y_resampled, dtype=torch.long).to(device)
 
 # 模型定义：ResNet 风格 FNN
 class ResBlock(nn.Module):
@@ -70,17 +101,12 @@ batch_size = 32
 learning_rate = 0.001
 input_dim = X_resampled.shape[1]
 num_classes = len(np.unique(y_encoded))
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# 将采样后的数据转成 Tensor
-X_tensor = torch.tensor(X_resampled, dtype=torch.float32)
-y_tensor = torch.tensor(y_resampled, dtype=torch.long)
 
 # 交叉验证
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 acc_list, precision_list, recall_list, f1_list = [], [], [], []
 
-for fold, (train_idx, test_idx) in enumerate(skf.split(X_tensor, y_tensor)):
+for fold, (train_idx, test_idx) in enumerate(skf.split(X_resampled, y_resampled)):
     print(f"\nFold {fold+1}")
     X_train, X_test = X_tensor[train_idx], X_tensor[test_idx]
     y_train, y_test = y_tensor[train_idx], y_tensor[test_idx]
